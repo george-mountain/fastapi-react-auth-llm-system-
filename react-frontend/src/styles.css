@@ -1,0 +1,354 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    font-family: Arial, sans-serif; 
+}
+
+
+.main-container {
+    width: 100vw;
+    height: 100vh;
+    background-color: #f8f9fa; 
+}
+
+.content {
+    flex: 1; 
+    padding: 1rem; 
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    justify-content: center; 
+}
+
+/* Navbar styling */
+.navbar {
+    background-color: #343a40; 
+    color: white;
+    padding: 0.5rem 1rem; 
+    display: flex;
+    justify-content: space-between; 
+    margin: 2.5rem 0; 
+}
+
+/* Header styling */
+.header {
+    padding: 0.5rem 1rem; 
+}
+
+/* General container styling */
+.container {
+    max-width: 1200px; 
+    margin: 0 auto; 
+    padding: 1rem; 
+}
+
+/* Styling for alert messages */
+.alert {
+    position: relative; 
+    margin-bottom: 1.5rem;
+    padding: 1rem; 
+    border-radius: 0.25rem; 
+    background-color: #fff; 
+    box-shadow: 0 0 0.5rem rgba(0,0,0,0.1); 
+}
+
+/* Close button styling */
+.alert .close-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: transparent;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    color: #6c757d;
+}
+
+.alert .close-btn:hover {
+    color: #000;
+}
+
+/* Specific alert variant styles */
+.alert-danger {
+    background-color: #f8d7da; /* Light red background for error messages */
+    color: #721c24; /* Dark red text color */
+}
+
+.alert-success {
+    background-color: #d4edda; /* Light green background for success messages */
+    color: #155724; /* Dark green text color */
+}
+
+.alert-info {
+    background-color: #d1ecf1; /* Light blue background for info messages */
+    color: #0c5460; /* Dark blue text color */
+}
+
+.alert-warning {
+    background-color: #fff3cd; /* Light yellow background for warning messages */
+    color: #856404; /* Dark yellow text color */
+}
+
+.btn {
+    margin: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.25rem;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn:hover {
+    opacity: 0.9; 
+}
+
+/* Login Form Styling */
+.login-container {
+    display: block;
+    padding: 2rem;
+    background-color: #ffffff; 
+    border-radius: 0.5rem; 
+    box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+.login-container h2 {
+    margin-bottom: 1.5rem; /* Space below the heading */
+    color: #343a40; /* Dark text color */
+}
+
+.login-form .form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 1rem; /* Space between form fields */
+}
+
+.login-form .form-control {
+    width: 100%; 
+    padding: 0.75rem; 
+    border-radius: 0.25rem; 
+    border: 1px solid #ced4da; 
+}
+
+.login-form .btn-primary {
+    width: auto; 
+    align-self: flex-end; /* Align button to the end of form control */
+    padding: 0.75rem;
+    border-radius: 0.25rem; 
+    font-size: 1rem; 
+}
+
+/* Add Item Form Styling */
+.add-item-container {
+    display: block;
+    padding: 2rem;
+    background-color: #ffffff; 
+    border-radius: 0.5rem; /* Rounded corners */
+    box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+.add-item-container .form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 1rem; /* Space between form fields */
+}
+
+.add-item-container .form-control {
+    width: 100%; 
+    padding: 0.75rem; 
+    border-radius: 0.25rem; 
+    border: 1px solid #ced4da; 
+}
+
+.add-item-container .btn-primary {
+    width: auto; 
+    align-self: flex-end; 
+    padding: 0.75rem;
+    border-radius: 0.25rem; 
+    font-size: 1rem; 
+}
+
+.add-item-container .alert {
+    margin-bottom: 1.5rem;
+    padding: 1rem; 
+    border-radius: 0.25rem; 
+    background-color: #f8d7da; 
+    color: #721c24; 
+}
+
+/* Dashboard Table Styling */
+.user-table {
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+.user-table th, .user-table td {
+    text-align: center; 
+}
+
+.user-table th {
+    background-color: #007bff; /* Blue background for table header */
+    color: white;
+    font-weight: bold;
+}
+
+.user-table td {
+    background-color: #ffffff; /* White background for table cells */
+}
+
+.user-table tbody tr:nth-child(even) {
+    background-color: #f8f9fa; /* Alternate row background color */
+}
+
+/* Signup Form Styling */
+.signup-container {
+    display: block;
+    padding: 2rem;
+    background-color: #ffffff; 
+    border-radius: 0.5rem; 
+    box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1); 
+}
+
+.signup-container h2 {
+    margin-bottom: 1.5rem; 
+    color: #343a40; 
+}
+
+.signup-form .form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 1rem; 
+}
+
+.signup-form .form-control {
+    width: 100%; 
+    padding: 0.75rem; 
+    border-radius: 0.25rem; 
+    border: 1px solid #ced4da; 
+}
+
+.signup-form .btn-primary {
+    width: auto; 
+    align-self: flex-end; 
+    padding: 0.75rem;
+    border-radius: 0.25rem; 
+    font-size: 1rem; 
+}
+
+
+
+/* Navbar styling */
+.navbar {
+    background-color: #343a40;
+    color: white;
+    padding: 0.5rem 1rem; 
+    display: flex;
+    justify-content: space-between; 
+    margin: 2.5rem 0; 
+}
+
+.navbar .dropdown-toggle {
+    background-color: #343a40; 
+    border: none;
+    color: white;
+}
+
+.navbar .dropdown-menu {
+    background-color: #343a40;
+    border: none;
+}
+
+.navbar .dropdown-item {
+    color: white;
+}
+
+.navbar .dropdown-item:hover {
+    background-color: #495057; 
+}
+
+
+
+.navbar .nav-link.active {
+    font-weight: bold; /* Highlight active link */
+    color: #007bff !important; /* Highlight color for active link */
+}
+
+.clickable {
+    cursor: pointer; /* Show a hand pointer on hover */
+  }
+  
+.chat-history-container {
+background-color: #f8f9fa; /* Light gray background */
+}
+
+
+.chat-container {
+    max-width: 800px;
+    margin: auto;
+  }
+  
+  .bot {
+    background-color: #f9f9f9;
+    border-left: 4px solid #007bff;
+  }
+  
+  code {
+    background-color: #000;
+    color: #fff;
+    padding: 2px 4px;
+    border-radius: 3px;
+  }
+  
+  pre {
+    background-color: #000;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    overflow: auto;
+    position: relative;
+  }
+  
+  .copy-button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    color: #fff;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .user-message {
+    background-color: #f1f1f1;
+  }
+  
+
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .container {
+        padding: 0.5rem; /* Reduce padding on smaller screens */
+    }
+
+    .login-form .form-control,
+    .login-form .btn-primary,
+    .add-item-container .form-control,
+    .add-item-container .btn-primary {
+        width: 100%; /* Full width for smaller screens */
+    }
+}
+
