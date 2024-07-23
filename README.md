@@ -1,5 +1,5 @@
 
-## Secure FastAPI Authentication System with Rate Limiting
+## Secure FastAPI-React LLM Authentication System with Rate Limiting
 
 A robust authentication service built with FastAPI, PostgreSQL, and Docker, designed to handle user registration, login, password reset, API Rate limiting, and account activation functionalities.
 
@@ -44,8 +44,8 @@ This project provides a secure and scalable authentication service using FastAPI
 ### Fork or Clone the repository
 
 ```bash
-git clone https://github.com/george-mountain/fastapi-auth-system
-cd fastapi-auth-system
+git clone https://github.com/george-mountain/fastapi-react-auth-llm-system-.git
+cd fastapi-react-auth-llm-system
 ```
 
 ### Environment Variables
