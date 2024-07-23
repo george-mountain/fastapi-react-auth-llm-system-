@@ -1,0 +1,111 @@
+services:
+  web:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fastapi_authentication_app
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    volumes:
+      - ./backend:/app
+    ports:
+      - "${BACKEND_PORT}:8000"
+    env_file:
+      - .env
+    
+    ipc: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+    depends_on:
+      - db
+      - redis
+    
+    networks:
+      - authentication_app_network
+  react-frontend:
+    build:
+      context: ./react-frontend
+      dockerfile: Dockerfile
+    container_name: react_frontend
+    command: "npm run dev -- --host"
+    env_file:
+      - .env
+    ports:
+      - "${REACT_FRONTEND_PORT}:5173"
+    volumes:
+      - ./react-frontend:/app
+    networks:
+      - authentication_app_network
+
+  db:
+    image: postgres:13
+    container_name: postgres_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    env_file:
+      - .env
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    networks:
+      - authentication_app_network
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "${REDIS_PORT}:6379"
+    networks:
+      - authentication_app_network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    env_file:
+      - .env
+    ports:
+      - "${PGADMIN_PORT}:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - db
+    networks:
+      - authentication_app_network
+  
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    volumes:
+      - ollama:/root/.ollama 
+    ports:
+      - "${OLLAMA_PORT}:11434"
+    env_file:
+      - .env
+    
+    ipc: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+    
+    networks:
+      - authentication_app_network
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+  ollama:
+
+networks:
+  authentication_app_network:
+    driver: bridge
+ 
