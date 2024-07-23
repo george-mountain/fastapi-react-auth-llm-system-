@@ -118,7 +118,9 @@ This will start the FastAPI server, PostgreSQL database, and Redis.
 ### Usage
 
 The service will be available at `http://localhost:8000/docs`.
+
 The frontend service will be available at `http://localhost:3001/`.
+
 The pgadmin service will be available at `http://localhost:5050/`.
 
 ### API Endpoints
