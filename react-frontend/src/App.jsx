@@ -10,7 +10,7 @@ import ForgotPassword from './components/Auth/ForgotPassword';
 import ResetPassword from './components/Auth/ResetPassword';
 import Dashboard from './components/Dashboard';
 import Chat from './components/models/Chat';
-import ChatHistory from './components/models/ChatHistory'; // Import ChatHistory
+import ChatHistory from './components/models/ChatHistory'; 
 import Cookies from 'universal-cookie';
 import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
@@ -20,6 +20,7 @@ import { request } from '../services/api';
 
 // Layout component
 import Layout from './components/Layout';
+
 
 const App = () => {
   const cookies = new Cookies();
