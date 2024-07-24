@@ -86,6 +86,7 @@ OLLAMA_PORT=11434
 # MICROSERVICES URL
 FRONTEND_URL=http://127.0.0.1:5173
 VITE_API_BASE_URL=http://localhost:${BACKEND_PORT}
+REDIS_URL=redis://redis:${REDIS_PORT}
 ```
 
 Note: for the SECRET_KEY, you can generate it using the following commands
@@ -117,7 +118,7 @@ This will start the FastAPI server, PostgreSQL database, and Redis.
 
 ### Usage
 
-The service will be available at `http://localhost:8000/docs`.
+The api services will be available at `http://localhost:8080/docs`.
 
 The frontend service will be available at `http://localhost:3001/`.
 
@@ -142,9 +143,12 @@ Request Body:
 
 **POST** `/token`
 
-Form Data:
-- `username`
-- `password`
+```json
+{
+  "username": "user",
+  "password": "password"
+}
+```
 
 #### Request Password Reset
 
@@ -172,5 +176,7 @@ Request Body:
 #### Activate User
 
 **GET** `/activate/{token}`
+
+### Many other api endpoints and expected data format can be seen here: `http://localhost:8080/docs`.
 
 
