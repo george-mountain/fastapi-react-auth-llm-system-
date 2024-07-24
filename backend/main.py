@@ -6,10 +6,9 @@ import auths
 import crud
 import models
 import schemas
-from database import SessionLocal, engine, get_db
+from database import engine, get_db
 from fastapi import Depends, FastAPI, HTTPException, Request, status, Query
-from fastapi.responses import JSONResponse, FileResponse
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import JSONResponse
 from fastapi_limiter import FastAPILimiter
 from fastapi_limiter.depends import RateLimiter
 from jose import JWTError, jwt
@@ -17,7 +16,10 @@ from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 from utils import ChatModel
 from contextlib import asynccontextmanager
+from dotenv import load_dotenv, find_dotenv
+import os
 
+load_dotenv(find_dotenv())
 
 import humanize
 from datetime import timedelta
@@ -27,7 +29,7 @@ models.Base.metadata.create_all(bind=engine)
 ai_models = {}
 
 # Initialize Redis connection
-redis_url = "redis://redis:6379"
+redis_url = os.getenv("REDIS_URL")
 
 
 @asynccontextmanager
@@ -137,11 +139,11 @@ async def rate_limit_middleware(request: Request, call_next):
 
 @app.post("/token", response_model=schemas.Token)
 async def login_for_access_token(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    login_data: schemas.LoginData,
     db: Session = Depends(get_db),
 ):
     user, error_message = auths.authenticate_user(
-        db, form_data.username, form_data.password
+        db, login_data.username, login_data.password
     )
 
     if error_message:
