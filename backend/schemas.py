@@ -3,6 +3,11 @@ from typing import List, Optional
 from datetime import datetime
 
 
+class LoginData(BaseModel):
+    username: str
+    password: str
+
+
 class ItemBase(BaseModel):
     title: str
     description: Optional[str] = None
