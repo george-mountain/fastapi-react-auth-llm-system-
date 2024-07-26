@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Form, Button, Container, Alert, Spinner } from 'react-bootstrap';
 import { request } from '../../../services/api';
+import toastHandler from '../../helpers/Toasthandler';
 import '../../styles.css'; 
 
 const Signup = () => {
@@ -17,13 +18,12 @@ const Signup = () => {
     setLoading(true); 
     try {
       await request.signup({ username, email, password });
-      setSuccess('Signup successful! Please check your email for the activation link.');
-      setError(''); // Clear any previous errors
+      toastHandler('Signup successful! Please check your email for the activation link.', 'success');
     } catch (err) {
       setError('Signup failed. Please try again.');
-      setSuccess(''); // Clear any previous success messages
+      toastHandler('Signup failed. Please try again.', 'error');
     } finally {
-      setLoading(false);  // Set loading to false when request finishes
+      setLoading(false);
     }
   };
 
