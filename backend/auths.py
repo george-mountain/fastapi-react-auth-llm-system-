@@ -55,14 +55,15 @@ def get_password_hash(password):
 def authenticate_user(db: Session, username: str, password: str):
     user = crud.get_user(db, username)
     if not user:
-        return None, "Incorrect username or password"
+        return None, "User not found. Check your username or sign up."
     if not verify_password(password, user.hashed_password):
-        return None, "Incorrect password"
+        return None, "Incorrect password. Check your password or reset it."
     if user.disabled:
         return (
             None,
             "Account is not activated. Please check your email for the activation link.",
         )
+
     return user, None
 
 
