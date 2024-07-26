@@ -4,7 +4,7 @@ import { Form, Button, Container, Spinner, Table } from 'react-bootstrap';
 import { request } from '../../../services/api';
 import '../../styles.css';
 import toastHandler from '../../helpers/Toasthandler';
-import { FaPencilAlt, FaSave } from 'react-icons/fa';
+import { FaPencilAlt, FaSave, FaTimes } from 'react-icons/fa';
 
 const Profile = () => {
   const [fullName, setFullName] = useState('');
@@ -14,6 +14,8 @@ const Profile = () => {
   const [initialLoading, setInitialLoading] = useState(true);
   const [editFullName, setEditFullName] = useState(false);
   const [editPhoneNumber, setEditPhoneNumber] = useState(false);
+  const [initialFullName, setInitialFullName] = useState('');
+  const [initialPhoneNumber, setInitialPhoneNumber] = useState('');
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -22,6 +24,8 @@ const Profile = () => {
         setUserData(response.data);
         setFullName(response.data.full_name || '');
         setPhoneNumber(response.data.phone_number || '');
+        setInitialFullName(response.data.full_name || '');
+        setInitialPhoneNumber(response.data.phone_number || '');
       } catch (err) {
         toastHandler('Failed to load profile data.', 'error');
       } finally {
@@ -69,6 +73,16 @@ const Profile = () => {
     }
   };
 
+  const handleCancel = (field) => {
+    if (field === 'full_name') {
+      setFullName(initialFullName);
+      setEditFullName(false);
+    } else {
+      setPhoneNumber(initialPhoneNumber);
+      setEditPhoneNumber(false);
+    }
+  };
+
   return (
     <Container className="profile-container mt-4">
       <h2 className="text-center mb-4">Profile</h2>
@@ -93,11 +107,21 @@ const Profile = () => {
                 <td>{userData.email}</td>
                 <td>
                   {editFullName ? (
-                    <Form.Control
-                      type="text"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                    />
+                    <>
+                      <Form.Control
+                        type="text"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                      />
+                      <Button
+                        variant="outline-secondary"
+                        size="sm"
+                        onClick={() => handleCancel('full_name')}
+                        className="ms-2"
+                      >
+                        <FaTimes />
+                      </Button>
+                    </>
                   ) : (
                     userData.full_name
                   )}
@@ -118,11 +142,21 @@ const Profile = () => {
                 </td>
                 <td>
                   {editPhoneNumber ? (
-                    <Form.Control
-                      type="text"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                    />
+                    <>
+                      <Form.Control
+                        type="text"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                      />
+                      <Button
+                        variant="outline-secondary"
+                        size="sm"
+                        onClick={() => handleCancel('phone_number')}
+                        className="ms-2"
+                      >
+                        <FaTimes />
+                      </Button>
+                    </>
                   ) : (
                     userData.phone_number
                   )}
