@@ -44,6 +44,16 @@ def get_users(db: Session):
     return db.query(User).all()
 
 
+def update_user(db: Session, user: User, user_update: schemas.UserUpdate):
+    if user_update.full_name is not None:
+        user.full_name = user_update.full_name
+    if user_update.phone_number is not None:
+        user.phone_number = user_update.phone_number
+    db.commit()
+    db.refresh(user)
+    return user
+
+
 def get_item(db: Session, item_id: int, user_id: int):
     return db.query(Item).filter(Item.id == item_id, Item.owner_id == user_id).first()
 
@@ -80,6 +90,7 @@ def get_chats_paginated(db: Session, user_id: int, page: int = 1, page_size: int
     )
     total = db.query(Chat).filter(Chat.user_id == user_id).count()
     return chats, total
+
 
 def get_chat_messages_paginated(
     db: Session, chat_id: int, page: int = 1, page_size: int = 5

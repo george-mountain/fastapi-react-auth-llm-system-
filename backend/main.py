@@ -291,6 +291,29 @@ async def read_users_me(
     return current_user
 
 
+@app.put("/users/me/", response_model=schemas.User)
+async def update_user(
+    user_update: schemas.UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auths.get_current_user),
+):
+    user = crud.update_user(db=db, user=current_user, user_update=user_update)
+    return user
+
+
+@app.patch("/users/me/", response_model=schemas.User)
+async def partial_update_user(
+    user_patch: schemas.UserPatch,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auths.get_current_user),
+):
+    user_update_data = user_patch.dict(exclude_unset=True)
+    if not user_update_data:
+        raise HTTPException(status_code=400, detail="No fields provided for update")
+    user = crud.update_user(db=db, user=current_user, user_update=user_update_data)
+    return user
+
+
 @app.get(
     "/resource",
     dependencies=[Depends(RateLimiter(times=2, seconds=5))],

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime
 
@@ -40,6 +40,7 @@ class UserCreate(UserBase):
 class User(UserBase):
     id: int
     items: List[Item] = []
+    phone_number: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -62,6 +63,16 @@ class PasswordResetRequest(BaseModel):
 
 class PasswordReset(BaseModel):
     new_password: str
+
+
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = None
+    phone_number: Optional[str] = None
+
+
+class UserPatch(BaseModel):
+    full_name: Optional[str] = Field(None, example="John Doe")
+    phone_number: Optional[str] = Field(None, example="123-456-7890")
 
 
 class ChatRequest(BaseModel):

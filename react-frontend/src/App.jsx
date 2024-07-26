@@ -8,6 +8,7 @@ import Login from './components/Auth/Login';
 import Signup from './components/Auth/Signup';
 import ForgotPassword from './components/Auth/ForgotPassword';
 import ResetPassword from './components/Auth/ResetPassword';
+import Profile from './components/Auth/Profile';
 import Dashboard from './components/Dashboard';
 import Chat from './components/models/Chat';
 import ChatHistory from './components/models/ChatHistory'; 
@@ -71,6 +72,7 @@ const App = () => {
                 <Route path="*" element={<Navigate to="/" />} />
                 <Route path="/code" element={<Chat userId={user_id}/>} />
                 <Route path="/code-history" element={<ChatHistory chatId={user_id} />} />
+                <Route path="/profile" element={<Profile />} />
               </>
             ) : (
               <>

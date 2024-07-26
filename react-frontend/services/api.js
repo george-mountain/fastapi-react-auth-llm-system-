@@ -18,6 +18,8 @@ export const request = {
     api.post(`/users/reset-password/${data.token}`, {
       new_password: data.new_password,
     }),
+  
+  updateProfile: (data) => api.put("/users/me/", data),
 
   // Chat related requests
   chat: (data) => api.post("/chat", data),
