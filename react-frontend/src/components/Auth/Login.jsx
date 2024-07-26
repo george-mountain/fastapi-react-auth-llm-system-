@@ -52,7 +52,7 @@ const Login = ({ setIsLoggedIn, setUser }) => {
         }
       })
       .catch((err) => {
-        toastHandler("Invalid credentials. Please try again.", "error");
+        console.error("Failed to login:", err.response.data.detail);
         setLoading(false);
       });
   };
