@@ -1,25 +1,46 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+import sys
 
 
 class ChatModel:
     def __init__(
         self,
         model="./CodeLlama-7b-Instruct-hf",
+        fallback_model="./CodeLlama-13b-Instruct-hf",
     ):
         quantization_config = BitsAndBytesConfig(
             load_in_4bit=True,  # use 4-bit quantization
             bnb_4bit_compute_dtype=torch.float16,
             bnb_4bit_use_double_quant=True,
         )
-        self.model = AutoModelForCausalLM.from_pretrained(
-            model,
-            quantization_config=quantization_config,
-            device_map="cuda",
-        )
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            model, use_fast=True, padding_side="left"
-        )
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+
+        try:
+            self.model = AutoModelForCausalLM.from_pretrained(
+                model,
+                quantization_config=quantization_config,
+                device_map=self.device,
+            )
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                model, use_fast=True, padding_side="left"
+            )
+        except Exception as e:
+            print(
+                f"model {model} not found. Trying to load {fallback_model} model: {e}"
+            )
+            try:
+                self.model = AutoModelForCausalLM.from_pretrained(
+                    fallback_model,
+                    quantization_config=quantization_config,
+                    device_map=self.device,
+                )
+                self.tokenizer = AutoTokenizer.from_pretrained(
+                    fallback_model, use_fast=True, padding_side="left"
+                )
+            except Exception as e:
+                print(f"Failed to load fallback model {fallback_model}: {e}")
+                sys.exit("Error: No model found. Terminating program.")
 
         self.history = []
         self.history_length = 1
@@ -38,7 +59,7 @@ class ChatModel:
         system_prompt,
         top_p=0.9,
         temperature=0.1,
-        max_new_tokens=8192,
+        max_new_tokens=16384,
     ):
         texts = [f"<s>[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\n"]
         do_strip = False
@@ -52,7 +73,7 @@ class ChatModel:
 
         inputs = self.tokenizer(
             prompt, return_tensors="pt", add_special_tokens=False
-        ).to("cuda")
+        ).to(self.device)
 
         output = self.model.generate(
             inputs["input_ids"],
@@ -64,7 +85,7 @@ class ChatModel:
             top_k=50,
             temperature=temperature,
         )
-        output = output[0].to("cpu")
+        output = output[0].to(self.device)
         response = self.tokenizer.decode(output[inputs["input_ids"].shape[1] : -1])
         self.append_to_history(user_prompt, response)
         return response
