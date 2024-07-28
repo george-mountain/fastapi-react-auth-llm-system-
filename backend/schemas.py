@@ -113,3 +113,7 @@ class MessageList(BaseModel):
 
 class ArchiveRequest(BaseModel):
     user_id: int
+
+
+class CodeExecutionRequest(BaseModel):
+    code: str

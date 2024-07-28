@@ -18,6 +18,9 @@ from utils import ChatModel
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv, find_dotenv
 import os
+import httpx
+import io
+
 
 load_dotenv(find_dotenv())
 
@@ -455,3 +458,18 @@ async def read_protected_own_items(
 ):
     items = crud.get_items(db=db, user_id=current_user.id)
     return {"message": "You are within rate limit", "items": items}
+
+
+@app.post("/execute_code")
+async def execute_code(request: schemas.CodeExecutionRequest):
+    code = request.code
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "http://code_execution_service:8001/execute_code", json={"code": code}
+            )
+            response_data = response.json()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return response_data

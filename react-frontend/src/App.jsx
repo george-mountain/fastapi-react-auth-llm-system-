@@ -18,6 +18,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import './styles.css'; 
 import { request } from '../services/api';
+import CodeEditor from './components/codeEditor/CodeEditor';
 
 // Layout component
 import Layout from './components/Layout';
@@ -73,6 +74,7 @@ const App = () => {
                 <Route path="/code" element={<Chat userId={user_id}/>} />
                 <Route path="/code-history" element={<ChatHistory chatId={user_id} />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/code-editor" element={<CodeEditor />} />
               </>
             ) : (
               <>

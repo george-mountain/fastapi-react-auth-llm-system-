@@ -21,6 +21,7 @@ services:
     depends_on:
       - db
       - redis
+      - code_execution_service
     
     networks:
       - authentication_app_network
@@ -106,11 +107,42 @@ services:
     
     networks:
       - authentication_app_network
+  
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    command: -H unix:///var/run/docker.sock
+    env_file:
+      - .env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    ports:
+      - "${PORTAINER_PORT}:9000"
+    networks:
+      - authentication_app_network
+  
+  code_execution_service:
+    build:
+      context: ./backend/code_executor
+    container_name: code_execution_service
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
+    env_file:
+      - .env
+   
+    volumes:
+      - ./backend/code_executor:/app
+      
+    expose:
+      - 8001
+    networks:
+      - authentication_app_network
 
 volumes:
   postgres_data:
   pgadmin_data:
   ollama:
+  portainer_data:
 
 networks:
   authentication_app_network:

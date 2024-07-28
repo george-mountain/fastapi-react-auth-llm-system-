@@ -26,4 +26,5 @@ humanize==4.10.0
 langchain-community==0.2.9
 ollama==0.3.0
 asyncio==3.4.3
+httpx
 

@@ -31,4 +31,7 @@ export const request = {
   deleteChat: (chatId) => api.delete(`/chats/${chatId}`),
   archiveAllChats: (userId) =>
     api.post(`/chats/archive_all`, { user_id: userId }),
+
+  // Code related requests
+  execute_code: (data) => api.post("/execute_code", data),
 };
