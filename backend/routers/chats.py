@@ -35,7 +35,11 @@ async def read_chat_messages(
 
 
 @router.delete("/chats/{chat_id}", response_model=schemas.ChatBase)
-async def delete_chat(chat_id: int, db: Session = Depends(get_db)):
+async def delete_chat(
+    chat_id: int,
+    current_user: Annotated[schemas.User, Depends(auths.get_current_active_user)],
+    db: Session = Depends(get_db),
+):
     chat = db.query(models.Chat).filter(models.Chat.id == chat_id).first()
     if not chat:
         raise HTTPException(status_code=404, detail="Chat not found")
@@ -46,7 +50,9 @@ async def delete_chat(chat_id: int, db: Session = Depends(get_db)):
 
 @router.post("/chats/archive_all", response_model=dict)
 async def archive_all_chats(
-    request: schemas.ArchiveRequest, db: Session = Depends(get_db)
+    request: schemas.ArchiveRequest,
+    current_user: Annotated[schemas.User, Depends(auths.get_current_active_user)],
+    db: Session = Depends(get_db),
 ):
     user_id = request.user_id
     chats = db.query(models.Chat).filter(models.Chat.user_id == user_id).all()
