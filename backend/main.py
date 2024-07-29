@@ -51,7 +51,7 @@ async def lifespan(app: FastAPI):
     ai_models.clear()
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, title="Authify API", version="0.1.0")
 
 # CORS
 app.add_middleware(
@@ -138,7 +138,7 @@ async def rate_limit_middleware(request: Request, call_next):
     return response
 
 
-@app.post("/chat", dependencies=[Depends(RateLimiter(times=2, seconds=60))])
+@app.post("/api/v1/chat", dependencies=[Depends(RateLimiter(times=2, seconds=60))])
 async def chat_endpoint(
     request: schemas.ChatRequest,
     current_user: Annotated[schemas.User, Depends(auths.get_current_active_user)],
@@ -171,7 +171,7 @@ async def chat_endpoint(
     return {"response": response}
 
 
-app.include_router(users.router, tags=["users"])
-app.include_router(items.router, tags=["items"])
-app.include_router(chats.router, tags=["chat"])
-app.include_router(code_editor.router, tags=["code"])
+app.include_router(users.router, prefix="/api/v1", tags=["users"])
+app.include_router(items.router, prefix="/api/v1", tags=["items"])
+app.include_router(chats.router, prefix="/api/v1", tags=["chat"])
+app.include_router(code_editor.router, prefix="/api/v1", tags=["code"])

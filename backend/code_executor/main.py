@@ -4,7 +4,7 @@ import subprocess
 import tempfile
 import os
 
-app = FastAPI()
+app = FastAPI(title="Code Executor Service", version="0.1.0")
 
 
 class CodeExecutionRequest(BaseModel):
