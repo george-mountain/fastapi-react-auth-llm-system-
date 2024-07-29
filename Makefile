@@ -57,7 +57,8 @@ remove-container:
 
 install:
 	pip install --upgrade pip && \
-	pip install -r packages.txt
+	pip install -r packages.txt && \
+	npm install --save-dev prettier
 
 format:
 	find -name '*.py' -exec isort {} + && \
