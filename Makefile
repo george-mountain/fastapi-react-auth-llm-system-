@@ -57,10 +57,13 @@ remove-container:
 
 install:
 	pip install --upgrade pip && \
-	pip install -r packages.txt
+	pip install -r packages.txt && \
+	npm install
 
 format:
-	find -name '*.py' -exec black {} +
+	find -name '*.py' -exec isort {} + && \
+	find -name '*.py' -exec black {} + && \
+	npx prettier --write "**/*.{js,jsx}"
 
 lint:
 	find . -type f -name '*.py' -print0 | xargs -0 pylint --disable=R,C || true
