@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Container, Row, Col, Button, Alert, Card } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/theme-monokai";
@@ -10,12 +9,32 @@ import "ace-builds/src-noconflict/ext-searchbox";
 import "ace-builds/src-noconflict/ext-error_marker";
 import "ace-builds/src-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/snippets/python";
-
+import { CopyToClipboard } from "react-copy-to-clipboard";
 import { request } from "../../../services/api";
+import toastHandler from "../../helpers/Toasthandler";
+
+const FORBIDDEN_KEYWORDS = [
+  "open",
+  "os.",
+  "os.system",
+  "os.remove",
+  "os.rmdir",
+  "os.mkdir",
+  "os.makedirs",
+  "os.rename",
+  "os.replace",
+  "os.unlink",
+  "subprocess",
+  "shutil",
+];
 
 const CodeEditor = () => {
   const [code, setCode] = useState("");
   const [output, setOutput] = useState("");
+  const [copiedCode, setCopiedCode] = useState(false);
+  const [copiedOutput, setCopiedOutput] = useState(false);
+  const [error, setError] = useState("");
+  const outputRef = useRef(null);
 
   useEffect(() => {
     // Load autocompletion for Python mode
@@ -24,14 +43,44 @@ const CodeEditor = () => {
     });
   }, []);
 
+  const containsForbiddenKeyword = (code) => {
+    for (let keyword of FORBIDDEN_KEYWORDS) {
+      if (code.includes(keyword)) {
+        return keyword;
+      }
+    }
+    return null;
+  };
+
   const executeCode = async () => {
+    const forbiddenKeyword = containsForbiddenKeyword(code);
+    if (forbiddenKeyword) {
+      setError(`Forbidden operation detected: ${forbiddenKeyword}`);
+      toastHandler(
+        `Forbidden operation detected: ${forbiddenKeyword}`,
+        "error"
+      );
+      setOutput("");
+      return;
+    }
+
     try {
       const response = await request.execute_code({ code });
       setOutput(response.data.result || response.data.error);
+      setError("");
     } catch (error) {
       setOutput(error.message);
+      // toastHandler(error.message, "error");
+      console.log("Error message: ", error.message);
+      setError("");
     }
   };
+
+  useEffect(() => {
+    if (output && outputRef.current) {
+      outputRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [output]);
 
   return (
     <Container>
@@ -44,6 +93,25 @@ const CodeEditor = () => {
         <Col>
           <Card className="shadow-lg p-3 mb-5 bg-white rounded">
             <Card.Body>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <h5>Code Editor</h5>
+                {code && (
+                  <CopyToClipboard
+                    text={code}
+                    onCopy={() => setCopiedCode(true)}
+                  >
+                    <Button variant="outline-secondary" size="sm">
+                      {copiedCode ? "Copied!" : "Copy Code"}
+                    </Button>
+                  </CopyToClipboard>
+                )}
+              </div>
               <AceEditor
                 mode="python"
                 theme="monokai"
@@ -52,14 +120,14 @@ const CodeEditor = () => {
                 name="code_editor"
                 editorProps={{ $blockScrolling: true }}
                 width="100%"
-                height="450px"
+                height="400px"
                 fontSize={18}
                 setOptions={{
                   enableBasicAutocompletion: true,
                   enableLiveAutocompletion: true,
                   enableSnippets: true,
                 }}
-                style={{ borderRadius: "5px" }} 
+                style={{ borderRadius: "5px" }}
               />
             </Card.Body>
           </Card>
@@ -72,10 +140,36 @@ const CodeEditor = () => {
           </Button>
         </Col>
       </Row>
-      {output && (
+      {error && (
         <Row className="my-3">
           <Col>
+            <Alert variant="danger">
+              <pre>{error}</pre>
+            </Alert>
+          </Col>
+        </Row>
+      )}
+      {output && (
+        <Row className="my-3">
+          <Col ref={outputRef}>
             <h3>Output:</h3>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <h5>Execution Output</h5>
+              <CopyToClipboard
+                text={output}
+                onCopy={() => setCopiedOutput(true)}
+              >
+                <Button variant="outline-secondary" size="sm">
+                  {copiedOutput ? "Copied!" : "Copy Output"}
+                </Button>
+              </CopyToClipboard>
+            </div>
             <Alert variant="secondary">
               <pre>{output}</pre>
             </Alert>
