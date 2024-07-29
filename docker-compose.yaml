@@ -4,6 +4,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: fastapi_authentication_app
+    image: fastapi_authentication_app
     command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     volumes:
       - ./backend:/app
@@ -30,6 +31,7 @@ services:
       context: ./react-frontend
       dockerfile: Dockerfile
     container_name: react_frontend
+    image: react_frontend
     command: "npm run dev -- --host"
     env_file:
       - .env
@@ -126,6 +128,7 @@ services:
     build:
       context: ./backend/code_executor
     container_name: code_execution_service
+    image: code_execution_service
     command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
     env_file:
       - .env
