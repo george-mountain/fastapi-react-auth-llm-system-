@@ -24,8 +24,6 @@ FORBIDDEN_KEYWORDS = [
     "os.unlink",
     "subprocess",
     "shutil",
-    "import",
-    "__import__",
     "eval",
     "exec",
     "compile",
