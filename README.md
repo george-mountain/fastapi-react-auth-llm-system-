@@ -114,6 +114,25 @@ git clone https://huggingface.co/codellama/CodeLlama-7b-Instruct-hf
 docker-compose up --build
 ```
 
+Alternatively, you can use the Makefile commands provided on the Makefile if you have Makefile.
+
+### Makefile Commands
+
+- `make build`: Build Docker images.
+- `make up`: Start Docker containers in detached mode.
+- `make up-v`: Start Docker containers in the foreground.
+- `make down`: Stop and remove Docker containers.
+- `make down-v`: Stop and remove Docker containers along with volumes.
+- `make status`: Show status of Docker containers.
+- `make show-logs`: Display logs of all Docker containers.
+- `make server-logs`: Display logs of the backend service.
+- `make frontend-logs`: Display logs of the frontend service.
+- `make restart`: Restart Docker containers.
+- `make prune`: Remove unused Docker resources.
+- `make remove-images`: Remove all Docker images.
+- `make stop-container`: Stop a specific Docker container.
+- `make remove-container`: Remove a specific Docker container.
+
 This will start the FastAPI server, PostgreSQL database, and Redis.
 
 ### Usage
@@ -177,6 +196,6 @@ Request Body:
 
 **GET** `/activate/{token}`
 
-### Many other api endpoints and expected data format can be seen here: `http://localhost:8080/docs`.
+`Many other api endpoints and expected data format can be seen here: http://localhost:8080/docs`.
 
 
