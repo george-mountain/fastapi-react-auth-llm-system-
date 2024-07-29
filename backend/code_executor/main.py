@@ -3,6 +3,7 @@ from pydantic import BaseModel
 import subprocess
 import tempfile
 import os
+import re
 
 app = FastAPI(title="Code Executor Service", version="0.1.0")
 
@@ -12,32 +13,32 @@ class CodeExecutionRequest(BaseModel):
 
 
 FORBIDDEN_KEYWORDS = [
-    "open",
-    "os.",
-    "os.system",
-    "os.remove",
-    "os.rmdir",
-    "os.mkdir",
-    "os.makedirs",
-    "os.rename",
-    "os.replace",
-    "os.unlink",
-    "subprocess",
-    "shutil",
-    "eval",
-    "exec",
-    "compile",
-    "input",
-    "sys",
-    "builtins",
-    "globals",
-    "locals",
+    (r"\bopen\b", "open"),
+    (r"\bos\.", "os"),
+    (r"\bos\.system\b", "os.system"),
+    (r"\bos\.remove\b", "os.remove"),
+    (r"\bos\.rmdir\b", "os.rmdir"),
+    (r"\bos\.mkdir\b", "os.mkdir"),
+    (r"\bos\.makedirs\b", "os.makedirs"),
+    (r"\bos\.rename\b", "os.rename"),
+    (r"\bos\.replace\b", "os.replace"),
+    (r"\bos\.unlink\b", "os.unlink"),
+    (r"\bsubprocess\b", "subprocess"),
+    (r"\bshutil\b", "shutil"),
+    (r"\beval\b", "eval"),
+    (r"\bexec\b", "exec"),
+    (r"\bcompile\b", "compile"),
+    (r"\binput\b", "input"),
+    (r"\bsys\b", "sys"),
+    (r"\bbuiltins\b", "builtins"),
+    (r"\bglobals\b", "globals"),
+    (r"\blocals\b", "locals"),
 ]
 
 
 def is_code_safe(code: str) -> (bool, str):
-    for keyword in FORBIDDEN_KEYWORDS:
-        if keyword in code:
+    for pattern, keyword in FORBIDDEN_KEYWORDS:
+        if re.search(pattern, code):
             return False, f"Forbidden operation detected: {keyword}"
     return True, ""
 
