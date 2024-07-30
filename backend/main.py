@@ -138,7 +138,11 @@ async def rate_limit_middleware(request: Request, call_next):
     return response
 
 
-@app.post("/api/v1/chat", dependencies=[Depends(RateLimiter(times=2, seconds=60))])
+@app.post(
+    "/api/v1/chat",
+    dependencies=[Depends(RateLimiter(times=2, seconds=60))],
+    tags=["chat"],
+)
 async def chat_endpoint(
     request: schemas.ChatRequest,
     current_user: Annotated[schemas.User, Depends(auths.get_current_active_user)],
