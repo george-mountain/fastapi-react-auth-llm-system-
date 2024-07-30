@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { Container, Row, Col, Button, Alert, Card } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -81,6 +82,20 @@ const CodeEditor = () => {
       outputRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [output]);
+
+  useEffect(() => {
+    if (copiedCode) {
+      const timer = setTimeout(() => setCopiedCode(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [copiedCode]);
+
+  useEffect(() => {
+    if (copiedOutput) {
+      const timer = setTimeout(() => setCopiedOutput(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [copiedOutput]);
 
   return (
     <Container>
