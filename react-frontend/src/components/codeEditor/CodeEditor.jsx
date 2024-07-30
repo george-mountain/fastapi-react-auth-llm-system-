@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Container, Row, Col, Button, Alert, Card } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -13,6 +12,7 @@ import "ace-builds/src-noconflict/snippets/python";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { request } from "../../../services/api";
 import toastHandler from "../../helpers/Toasthandler";
+import { FaMoon, FaSun } from "react-icons/fa";
 
 const FORBIDDEN_KEYWORDS = [
   "open",
@@ -35,6 +35,7 @@ const CodeEditor = () => {
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedOutput, setCopiedOutput] = useState(false);
   const [error, setError] = useState("");
+  const [theme, setTheme] = useState("monokai");
   const outputRef = useRef(null);
 
   useEffect(() => {
@@ -71,7 +72,6 @@ const CodeEditor = () => {
       setError("");
     } catch (error) {
       setOutput(error.message);
-      // toastHandler(error.message, "error");
       console.log("Error message: ", error.message);
       setError("");
     }
@@ -97,6 +97,10 @@ const CodeEditor = () => {
     }
   }, [copiedOutput]);
 
+  const toggleTheme = () => {
+    setTheme((prevTheme) => (prevTheme === "monokai" ? "github" : "monokai"));
+  };
+
   return (
     <Container>
       <Row className="my-3">
@@ -116,20 +120,25 @@ const CodeEditor = () => {
                 }}
               >
                 <h5>Code Editor</h5>
-                {code && (
-                  <CopyToClipboard
-                    text={code}
-                    onCopy={() => setCopiedCode(true)}
-                  >
-                    <Button variant="outline-secondary" size="sm">
-                      {copiedCode ? "Copied!" : "Copy Code"}
-                    </Button>
-                  </CopyToClipboard>
-                )}
+                <div>
+                  {code && (
+                    <CopyToClipboard
+                      text={code}
+                      onCopy={() => setCopiedCode(true)}
+                    >
+                      <Button variant="outline-secondary" size="sm">
+                        {copiedCode ? "Copied!" : "Copy Code"}
+                      </Button>
+                    </CopyToClipboard>
+                  )}
+                  <Button variant="outline-secondary" size="sm" onClick={toggleTheme} style={{ marginLeft: "10px" }}>
+                    {theme === "monokai" ? <FaSun /> : <FaMoon />}
+                  </Button>
+                </div>
               </div>
               <AceEditor
                 mode="python"
-                theme="monokai"
+                theme={theme}
                 value={code}
                 onChange={(newCode) => setCode(newCode)}
                 name="code_editor"
