@@ -22,7 +22,7 @@ const Navbar = ({ isLoggedIn, handleLogout, userName }) => {
                   <Nav.Link as={Link} to="/" className={location.pathname === '/' ? 'active' : ''}>Home</Nav.Link>
                   <Nav.Link as={Link} to="/chat" className={location.pathname === '/chat' ? 'active' : ''}>Chat</Nav.Link>
                   <Nav.Link as={Link} to="code" className={location.pathname === '/code' ? 'active' : ''}>Code Generation</Nav.Link>
-                  <Nav.Link as={Link} to="/translation" className={location.pathname === '/page2' ? 'active' : ''}>Translation Service</Nav.Link>
+                  <Nav.Link as={Link} to="/translation" className={location.pathname === '/translation' ? 'active' : ''}>Translation Service</Nav.Link>
                   <Nav.Link as={Link} to="code-editor" className={location.pathname === '/code-editor' ? 'active' : ''}>Code Editor</Nav.Link>
                 </>
               ) : (
