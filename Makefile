@@ -20,7 +20,7 @@ show-logs:
 	docker compose logs
 
 server-logs:
-	docker compose logs backend
+	docker compose logs web
 
 frontend-logs:
 	docker compose logs frontend
@@ -35,6 +35,15 @@ remove-images:
 	@read -p "WARNING: This will remove all Docker images. Are you sure you want to continue? (y/N) " confirm; \
 	if [ "$$confirm" = "y" ] || [ "$$confirm" = "Y" ]; then \
 		docker rmi -f $$(docker images -a -q); \
+	else \
+		echo "Operation canceled."; \
+	fi
+
+
+remove-volumes:
+	@read -p "WARNING: This will remove all Docker volumes and data maybe lost. Are you sure you want to continue? (y/N) " confirm; \
+	if [ "$$confirm" = "y" ] || [ "$$confirm" = "Y" ]; then \
+		docker volume rm $$(docker volume ls -q); \
 	else \
 		echo "Operation canceled."; \
 	fi
