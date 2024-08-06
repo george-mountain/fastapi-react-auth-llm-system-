@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Container, Form, Button, ListGroup, Spinner } from "react-bootstrap";
 import ReactMarkdown from "react-markdown";
@@ -12,7 +13,6 @@ const Chat = ({ userId }) => {
   const [userInput, setUserInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [rateLimitMessage, setRateLimitMessage] = useState("");
   const responseAreaRef = useRef(null);
 
   const cookies = new Cookies();
@@ -41,9 +41,7 @@ const Chat = ({ userId }) => {
         You are a versatile chatbot that can help with a variety of tasks.
         You can provide assistance with coding, programming, and general questions.
         If the user did not ask any specific questions, you can provide general information or engage in casual conversation.
-
-        
-        `;
+      `;
 
       const res = await fetch("http://127.0.0.1:8080/api/v1/generate/", {
         method: "POST",
@@ -53,10 +51,12 @@ const Chat = ({ userId }) => {
         },
         body: JSON.stringify({ prompt: userInput, system_prompt: system_prompt }),
       });
+      console.log("response from chat api", res);
 
       if (res.status === 429) {
-        const timeLeft = res.data.time_left;
-        setRateLimitMessage(`Rate limit exceeded. Try again after ${timeLeft}`);
+        const data = await res.json();
+        const timeLeft = data.time_left;
+        toastHandler(`Rate limit exceeded. Try again after ${timeLeft}`, "warning");
         setLoading(false);
         return;
       }
@@ -100,11 +100,10 @@ const Chat = ({ userId }) => {
 
       const responseStream = new Response(stream);
       await responseStream.text(); // This ensures that the stream is fully consumed
-      setRateLimitMessage("");
     } catch (error) {
       if (error.response?.status === 429) {
         const timeLeft = error.response.data.time_left;
-        setRateLimitMessage(`Rate limit exceeded. Try again after ${timeLeft}`);
+        toastHandler(`Rate limit exceeded. Try again after ${timeLeft}`, "warning");
       } else {
         console.error("Chat API error:", error.response?.data || error.message);
         toastHandler("Failed to get response from chat API.", "error");
@@ -221,9 +220,6 @@ const Chat = ({ userId }) => {
         </Button>
       </Form>
       <Link to="/code-history">View Chat History</Link>
-      {rateLimitMessage && (
-        <p className="mt-3 text-danger">{rateLimitMessage}</p>
-      )}
     </Container>
   );
 };

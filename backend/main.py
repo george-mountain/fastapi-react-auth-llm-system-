@@ -1,45 +1,30 @@
 from datetime import timedelta
 from typing import Annotated
-
 import aioredis
-
 from repositories.database import engine
 from sqlalchemy.orm import Session
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from fastapi_limiter import FastAPILimiter
 from fastapi_limiter.depends import RateLimiter
-
 from fastapi.middleware.cors import CORSMiddleware
-
-# from repositories.utils import ChatModel
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv, find_dotenv
 import os
-
 from routers import users, chats, code_editor, items
 from repositories import models, schemas, auths, crud
 from repositories.database import get_db
-
 import torch
-from transformers import (
-    AutoTokenizer,
-    AutoModelForCausalLM,
-    TextIteratorStreamer,
-)
-
+from transformers import AutoTokenizer, AutoModelForCausalLM, TextIteratorStreamer
 from fastapi.responses import StreamingResponse
 from contextlib import asynccontextmanager
 from threading import Thread
-
-
-load_dotenv(find_dotenv())
-
 import humanize
 from datetime import timedelta
 
-models.Base.metadata.create_all(bind=engine)
+load_dotenv(find_dotenv())
 
+models.Base.metadata.create_all(bind=engine)
 
 model_checkpoint_path = "./meta-llama/Meta-Llama-3.1-8B-Instruct"
 
@@ -60,7 +45,6 @@ class ChatModel:
     ):
         complete_prompt = f"{system_prompt} {prompt}"
         messages = [{"role": "user", "content": complete_prompt}]
-
         inputs = self.tokenizer.apply_chat_template(
             messages,
             return_dict=True,
@@ -68,29 +52,20 @@ class ChatModel:
             add_generation_prompt=True,
             return_tensors="pt",
         ).to("cuda")
-
         streamer = TextIteratorStreamer(
             self.tokenizer, skip_prompt=True, skip_special_tokens=True, timeout=None
         )
-
         generation_kwargs = dict(
             inputs, streamer=streamer, max_new_tokens=8192, do_sample=True
         )
         thread = Thread(target=self.model.generate, kwargs=generation_kwargs)
         thread.start()
-
         complete_response = ""
         for new_text in streamer:
             complete_response += new_text
             yield new_text
-
-        # Create a new chat session for the user
         chat = crud.create_chat(db, user_id=user_id)
-
-        # Save user's message
         crud.create_message(db, chat_id=chat.id, sender="user", content=prompt)
-
-        # Save bot's response
         crud.create_message(
             db, chat_id=chat.id, sender="bot", content=complete_response
         )
@@ -99,30 +74,22 @@ class ChatModel:
 chat_model = None
 ai_models = {}
 
-# Initialize Redis connection
 redis_url = os.getenv("REDIS_URL")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global chat_model
-
-    # Initialize ChatModel
-    # chat_model = ChatModel()
     chat_model = ChatModel(model_checkpoint=model_checkpoint_path)
     ai_models["chat_model"] = chat_model
-
-    # Initialize FastAPILimiter
     redis = aioredis.from_url(redis_url, encoding="utf8", decode_responses=True)
     await FastAPILimiter.init(redis)
-
     yield
     ai_models.clear()
 
 
 app = FastAPI(lifespan=lifespan, title="Authify API", version="0.1.0")
 
-# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -132,7 +99,6 @@ app.add_middleware(
 )
 
 
-# Custom handler for 429 errors
 @app.exception_handler(HTTPException)
 async def custom_http_exception_handler(request, exc):
     headers = {"Access-Control-Allow-Origin": "*"}
@@ -168,7 +134,6 @@ async def rate_limit_middleware(request: Request, call_next):
     endpoint = request.url.path
     key = f"cooldown:{ip}:{endpoint}"
 
-    # Check if cooldown key exists
     cooldown_expiry = await redis.ttl(key)
 
     def format_time(seconds):
@@ -189,9 +154,8 @@ async def rate_limit_middleware(request: Request, call_next):
     response = await call_next(request)
 
     if response.status_code == 429:
-        # Set cooldown for 3 minutes
         await redis.set(key, 1, ex=3 * 60)
-        cooldown_expiry = await redis.ttl(key)  # Get the new expiry time
+        cooldown_expiry = await redis.ttl(key)
         time_left = format_time(cooldown_expiry)
         print(f"Time left to reset rate limit: {time_left}")
         return JSONResponse(
@@ -207,7 +171,11 @@ async def rate_limit_middleware(request: Request, call_next):
     return response
 
 
-@app.post("/api/v1/generate/", tags=["chat"])
+@app.post(
+    "/api/v1/generate/",
+    dependencies=[Depends(RateLimiter(times=2, seconds=60))],
+    tags=["chat"],
+)
 async def generate(
     request: Request,
     current_user: Annotated[schemas.User, Depends(auths.get_current_user)],
@@ -218,7 +186,6 @@ async def generate(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
         )
-
     data = await request.json()
     prompt = data["prompt"]
     system_prompt = data["system_prompt"]
