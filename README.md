@@ -81,7 +81,7 @@ REACT_FRONTEND_PORT=3001
 POSTGRES_PORT=5433
 REDIS_PORT=6379
 PGADMIN_PORT=5050
-OLLAMA_PORT=11434
+
 
 # MICROSERVICES URL
 FRONTEND_URL=http://127.0.0.1:5173
@@ -95,6 +95,29 @@ openssl rand -hex 32
 ```
 
 For the AI models, you will first have to download the models to the backend directory.
+
+In this project, AI model used Meta-Llama-3.1-8B-Instruct
+You can download the Meta-Llama-3.1-8B-Instruct by following the following instructions:
+
+- **Request Model Access from Meta**: Go to this link: `https://llama.meta.com/llama-downloads/`
+- After requesting access, download the model to the backend directory from hugging face using the following command:
+```bash
+cd backend
+
+huggingface-cli download meta-llama/Meta-Llama-3.1-8B-Instruct --local-dir meta-llama/Meta-Llama-3.1-8B-Instruct
+```
+- **Ensure Transformer Package is updated**: You need transformer library version of at least 
+```bash
+transformers==4.43.3
+```
+If you are running the application via docker as setup on this project, you do not need to worry about the transformer
+package being updated.
+
+
+If you cannot use meta-llama/Meta-Llama-3.1-8B-Instruct, you can use alternative huggingface models such as code llama.
+
+If you are using alternative models, please follow the steps below.
+
 To download, you can simply use git clone. But before using the git clone, ensure you have 
 git LFS installed.
 You can download it via this link: https://git-lfs.com/
