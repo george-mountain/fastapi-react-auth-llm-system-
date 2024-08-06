@@ -11,7 +11,8 @@ from fastapi_limiter import FastAPILimiter
 from fastapi_limiter.depends import RateLimiter
 
 from fastapi.middleware.cors import CORSMiddleware
-from repositories.utils import ChatModel
+
+# from repositories.utils import ChatModel
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv, find_dotenv
 import os
@@ -20,6 +21,17 @@ from routers import users, chats, code_editor, items
 from repositories import models, schemas, auths, crud
 from repositories.database import get_db
 
+import torch
+from transformers import (
+    AutoTokenizer,
+    AutoModelForCausalLM,
+    TextIteratorStreamer,
+)
+
+from fastapi.responses import StreamingResponse
+from contextlib import asynccontextmanager
+from threading import Thread
+
 
 load_dotenv(find_dotenv())
 
@@ -27,6 +39,62 @@ import humanize
 from datetime import timedelta
 
 models.Base.metadata.create_all(bind=engine)
+
+
+model_checkpoint_path = "./meta-llama/Meta-Llama-3.1-8B-Instruct"
+
+
+class ChatModel:
+    def __init__(self, model_checkpoint: str):
+        self.tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
+        self.model = AutoModelForCausalLM.from_pretrained(
+            model_checkpoint, torch_dtype=torch.bfloat16, device_map="cuda"
+        )
+
+    def generate_text(
+        self,
+        prompt: str,
+        system_prompt: str,
+        user_id: int,
+        db: Session = Depends(get_db),
+    ):
+        complete_prompt = f"{system_prompt} {prompt}"
+        messages = [{"role": "user", "content": complete_prompt}]
+
+        inputs = self.tokenizer.apply_chat_template(
+            messages,
+            return_dict=True,
+            tokenize=True,
+            add_generation_prompt=True,
+            return_tensors="pt",
+        ).to("cuda")
+
+        streamer = TextIteratorStreamer(
+            self.tokenizer, skip_prompt=True, skip_special_tokens=True, timeout=None
+        )
+
+        generation_kwargs = dict(
+            inputs, streamer=streamer, max_new_tokens=8192, do_sample=True
+        )
+        thread = Thread(target=self.model.generate, kwargs=generation_kwargs)
+        thread.start()
+
+        complete_response = ""
+        for new_text in streamer:
+            complete_response += new_text
+            yield new_text
+
+        # Create a new chat session for the user
+        chat = crud.create_chat(db, user_id=user_id)
+
+        # Save user's message
+        crud.create_message(db, chat_id=chat.id, sender="user", content=prompt)
+
+        # Save bot's response
+        crud.create_message(
+            db, chat_id=chat.id, sender="bot", content=complete_response
+        )
+
 
 chat_model = None
 ai_models = {}
@@ -40,7 +108,8 @@ async def lifespan(app: FastAPI):
     global chat_model
 
     # Initialize ChatModel
-    chat_model = ChatModel()
+    # chat_model = ChatModel()
+    chat_model = ChatModel(model_checkpoint=model_checkpoint_path)
     ai_models["chat_model"] = chat_model
 
     # Initialize FastAPILimiter
@@ -138,41 +207,25 @@ async def rate_limit_middleware(request: Request, call_next):
     return response
 
 
-@app.post(
-    "/api/v1/chat",
-    dependencies=[Depends(RateLimiter(times=2, seconds=60))],
-    tags=["chat"],
-)
-async def chat_endpoint(
-    request: schemas.ChatRequest,
-    current_user: Annotated[schemas.User, Depends(auths.get_current_active_user)],
+@app.post("/api/v1/generate/", tags=["chat"])
+async def generate(
+    request: Request,
+    current_user: Annotated[schemas.User, Depends(auths.get_current_user)],
     db: Session = Depends(get_db),
 ):
-
+    print(f"Current user: {current_user}")
     if not current_user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
         )
 
-    # Create a new chat session for the user
-    chat = crud.create_chat(db, user_id=current_user.id)
-
-    # Save user's message
-    crud.create_message(db, chat_id=chat.id, sender="user", content=request.user_prompt)
-
-    # Generate bot response
-    response = chat_model.generate(
-        user_prompt=request.user_prompt,
-        system_prompt=chat_model.DEFAULT_SYSTEM_PROMPT,
-        top_p=request.top_p,
-        temperature=request.temperature,
-        max_new_tokens=request.max_new_tokens,
+    data = await request.json()
+    prompt = data["prompt"]
+    system_prompt = data["system_prompt"]
+    return StreamingResponse(
+        chat_model.generate_text(prompt, system_prompt, current_user.id, db),
+        media_type="text/plain",
     )
-
-    # Save bot's response
-    crud.create_message(db, chat_id=chat.id, sender="bot", content=response)
-
-    return {"response": response}
 
 
 app.include_router(users.router, prefix="/api/v1", tags=["users"])
