@@ -11,7 +11,9 @@ import ResetPassword from './components/Auth/ResetPassword';
 import Profile from './components/Auth/Profile';
 import Dashboard from './components/Dashboard';
 import Chat from './components/models/Chat';
+import CodeGenerator from './components/models/CodeGenerator';
 import ChatHistory from './components/models/ChatHistory'; 
+import Translation from './components/models/Translation';
 import Cookies from 'universal-cookie';
 import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
@@ -71,7 +73,9 @@ const App = () => {
               <>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="*" element={<Navigate to="/" />} />
-                <Route path="/code" element={<Chat userId={user_id}/>} />
+                <Route path="/chat" element={<Chat userId={user_id}/>} />
+                <Route path="/code" element={<CodeGenerator userId={user_id} />} />
+                <Route path="/translation" element={<Translation userId={user_id} />} />
                 <Route path="/code-history" element={<ChatHistory chatId={user_id} />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/code-editor" element={<CodeEditor />} />
