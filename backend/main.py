@@ -152,23 +152,10 @@ async def rate_limit_middleware(request: Request, call_next):
             headers={"Access-Control-Allow-Origin": "*"},
         )
 
-    # Apply throttling based on 5 requests in 2 minutes
-    throttle_key = f"throttle:{ip}:{endpoint}"
-    requests_count = await redis.incr(throttle_key)
-    if requests_count == 1:
-        await redis.expire(throttle_key, 2 * 60)  # 2 minutes expiry
-
-    if requests_count > 5:
-        delay = (
-            requests_count - 5
-        ) * 2  # Delay 2 seconds per request exceeding 5 in 2 mins
-        print(f"Throttling applied: Delaying request by {delay} seconds.")
-        await asyncio.sleep(delay)
-
     response = await call_next(request)
 
     if response.status_code == 429:
-        await redis.set(key, 1, ex=3 * 60)  # Apply 3 minutes cooldown
+        await redis.set(key, 1, ex=3 * 60)
         cooldown_expiry = await redis.ttl(key)
         time_left = format_time(cooldown_expiry)
         print(f"Time left to reset rate limit: {time_left}")
