@@ -21,6 +21,7 @@ from contextlib import asynccontextmanager
 from threading import Thread
 import humanize
 from datetime import timedelta
+import asyncio
 
 load_dotenv(find_dotenv())
 
@@ -56,7 +57,7 @@ class ChatModel:
             self.tokenizer, skip_prompt=True, skip_special_tokens=True, timeout=None
         )
         generation_kwargs = dict(
-            inputs, streamer=streamer, max_new_tokens=8192, do_sample=True
+            inputs, streamer=streamer, max_new_tokens=128000, do_sample=True
         )
         thread = Thread(target=self.model.generate, kwargs=generation_kwargs)
         thread.start()
@@ -151,10 +152,23 @@ async def rate_limit_middleware(request: Request, call_next):
             headers={"Access-Control-Allow-Origin": "*"},
         )
 
+    # Apply throttling based on 5 requests in 2 minutes
+    throttle_key = f"throttle:{ip}:{endpoint}"
+    requests_count = await redis.incr(throttle_key)
+    if requests_count == 1:
+        await redis.expire(throttle_key, 2 * 60)  # 2 minutes expiry
+
+    if requests_count > 5:
+        delay = (
+            requests_count - 5
+        ) * 2  # Delay 2 seconds per request exceeding 5 in 2 mins
+        print(f"Throttling applied: Delaying request by {delay} seconds.")
+        await asyncio.sleep(delay)
+
     response = await call_next(request)
 
     if response.status_code == 429:
-        await redis.set(key, 1, ex=3 * 60)
+        await redis.set(key, 1, ex=3 * 60)  # Apply 3 minutes cooldown
         cooldown_expiry = await redis.ttl(key)
         time_left = format_time(cooldown_expiry)
         print(f"Time left to reset rate limit: {time_left}")
@@ -173,7 +187,7 @@ async def rate_limit_middleware(request: Request, call_next):
 
 @app.post(
     "/api/v1/generate/",
-    dependencies=[Depends(RateLimiter(times=2, seconds=60))],
+    dependencies=[Depends(RateLimiter(times=15, minutes=10))],
     tags=["chat"],
 )
 async def generate(
@@ -193,6 +207,15 @@ async def generate(
         chat_model.generate_text(prompt, system_prompt, current_user.id, db),
         media_type="text/plain",
     )
+
+
+@app.get(
+    "/api/v1/test_rate/",
+    dependencies=[Depends(RateLimiter(times=15, minutes=10))],
+    tags=["rate-limit"],
+)
+async def test_rate():
+    return {"message": "Rate limit test successful."}
 
 
 app.include_router(users.router, prefix="/api/v1", tags=["users"])
