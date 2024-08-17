@@ -21,7 +21,7 @@ services:
             - capabilities: [gpu]
     depends_on:
       - db
-      - redis
+      - redis_server
       - code_execution_service
     
     networks:
@@ -53,7 +53,7 @@ services:
     image: postgres:13
     container_name: postgres_db
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_llm_system:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -65,17 +65,18 @@ services:
     networks:
       - authentication_app_network
 
-  redis:
+  redis_server:
     image: redis:latest
-    container_name: redis
+    container_name: redis_server
     ports:
       - "${REDIS_PORT}:6379"
+    command: ["redis-server", "--port", "${REDIS_PORT}"]
     networks:
       - authentication_app_network
 
-  pgadmin:
+  pgadmin_llm_system:
     image: dpage/pgadmin4
-    container_name: pgadmin
+    container_name: pgadmin_llm_system
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
@@ -84,7 +85,7 @@ services:
     ports:
       - "${PGADMIN_PORT}:80"
     volumes:
-      - pgadmin_data:/var/lib/pgadmin
+      - pgadmin_data_llm_system:/var/lib/pgadmin
     depends_on:
       - db
     networks:
@@ -122,9 +123,8 @@ services:
       - authentication_app_network
 
 volumes:
-  postgres_data:
-  pgadmin_data:
-  ollama:
+  postgres_data_llm_system:
+  pgadmin_data_llm_system:
   portainer_data:
 
 networks:
